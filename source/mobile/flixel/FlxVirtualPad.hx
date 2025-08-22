@@ -26,6 +26,7 @@ enum FlxActionMode
 {
 	A;
 	B;
+	P;
 	A_B;
 	A_B_C;
 	A_B_E;
@@ -57,6 +58,7 @@ class FlxVirtualPad extends FlxSpriteGroup
 
 	public var buttonA:FlxButton = new FlxButton(0, 0);
 	public var buttonB:FlxButton = new FlxButton(0, 0);
+	public var buttonP:FlxButton = new FlxButton(0, 0);
 	public var buttonC:FlxButton = new FlxButton(0, 0);
 	public var buttonD:FlxButton = new FlxButton(0, 0);
 	public var buttonE:FlxButton = new FlxButton(0, 0);
@@ -71,7 +73,7 @@ class FlxVirtualPad extends FlxSpriteGroup
 	 * @param   DPadMode     The D-Pad mode. `LEFT_FULL` for example.
 	 * @param   ActionMode   The action buttons mode. `A_B_C` for example.
 	 */
-	public function new(DPad:FlxDPadMode, Action:FlxActionMode)
+	public function new(DPad:FlxDPadMode, Action:FlxActionMode):Void
 	{
 		super();
 
@@ -115,6 +117,8 @@ class FlxVirtualPad extends FlxSpriteGroup
 				add(buttonA = createButton(FlxG.width - 132, FlxG.height - 135, 'a', 0xFF0000));
 			case B:
 				add(buttonB = createButton(FlxG.width - 132, FlxG.height - 135, 'b', 0xFFCB00));
+			case P:
+				add(buttonP = createButton(FlxG.width - 132, 0, 'x', 0x99062D));
 			case A_B:
 				add(buttonB = createButton(FlxG.width - 258, FlxG.height - 135, 'b', 0xFFCB00));
 				add(buttonA = createButton(FlxG.width - 132, FlxG.height - 135, 'a', 0xFF0000));
@@ -177,6 +181,7 @@ class FlxVirtualPad extends FlxSpriteGroup
 
 		buttonA = FlxDestroyUtil.destroy(buttonA);
 		buttonB = FlxDestroyUtil.destroy(buttonB);
+		buttonP = FlxDestroyUtil.destroy(buttonP);
 		buttonC = FlxDestroyUtil.destroy(buttonC);
 		buttonD = FlxDestroyUtil.destroy(buttonD);
 		buttonE = FlxDestroyUtil.destroy(buttonE);
@@ -196,12 +201,18 @@ class FlxVirtualPad extends FlxSpriteGroup
 			graphic = FlxG.bitmap.add('assets/mobile/virtualpad/default.png');
 
 		var button:FlxButton = new FlxButton(X, Y);
-		button.frames = FlxTileFrames.fromGraphic(graphic, FlxPoint.get(Std.int(graphic.width / 3), graphic.height));
+		try {
+			button.frames = FlxTileFrames.fromGraphic(graphic, FlxPoint.get(Std.int(graphic.width / 3), graphic.height));
+		}
+		catch (e){
+			trace("Failed to create button(s) " + e.message);
+			return null;
+		}
 		button.solid = false;
 		button.immovable = true;
 		button.scrollFactor.set();
 		button.color = Color;
-		button.alpha = ClientPrefs.padalpha;
+		button.alpha = 0.5;
 		#if FLX_DEBUG
 		button.ignoreDrawDebug = true;
 		#end

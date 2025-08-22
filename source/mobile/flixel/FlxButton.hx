@@ -11,7 +11,11 @@ import flixel.input.FlxPointer;
 import flixel.input.IFlxInput;
 import flixel.input.touch.FlxTouch;
 import flixel.math.FlxPoint;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.text.FlxText;
 import flixel.util.FlxDestroyUtil;
 
@@ -49,7 +53,7 @@ class FlxButton extends FlxTypedButton<FlxText>
 	 * @param   Text      The text that you want to appear on the button.
 	 * @param   OnClick   The function to call whenever the button is clicked.
 	 */
-	public function new(X:Float = 0, Y:Float = 0, ?Text:String, ?OnClick:Void->Void)
+	public function new(X:Float = 0, Y:Float = 0, ?Text:String, ?OnClick:Void->Void):Void
 	{
 		super(X, Y, OnClick);
 
@@ -136,6 +140,11 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	public var allowSwiping:Bool = true;
 
 	/**
+	 * Whether the button can use multiple fingers on it.
+	 */
+	public var multiTouch:Bool = false;
+
+	/**
 	 * Maximum distance a pointer can move to still trigger event handlers.
 	 * If it moves beyond this limit, onOut is triggered.
 	 * Defaults to `Math.POSITIVE_INFINITY` (i.e. no limit).
@@ -197,7 +206,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	 * @param   Y         The y position of the button.
 	 * @param   OnClick   The function to call whenever the button is clicked.
 	 */
-	public function new(X:Float = 0, Y:Float = 0, ?OnClick:Void->Void)
+	public function new(X:Float = 0, Y:Float = 0, ?OnClick:Void->Void):Void
 	{
 		super(X, Y);
 
@@ -208,7 +217,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		onOver = new FlxButtonEvent();
 		onOut = new FlxButtonEvent();
 
-		status = FlxButton.NORMAL;
+		status = multiTouch ? FlxButton.NORMAL : FlxButton.HIGHLIGHT;
 
 		// Since this is a UI element, the default scrollFactor is (0, 0)
 		scrollFactor.set();
@@ -234,7 +243,7 @@ class FlxTypedButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	function setupAnimation(animationName:String, frameIndex:Int):Void
 	{
 		// make sure the animation doesn't contain an invalid frame
-		frameIndex = Std.int(Math.min(frameIndex, animation.frames - 1));
+		frameIndex = Std.int(Math.min(frameIndex, #if (flixel < "5.3.0") animation.frames #else animation.numFrames #end - 1));
 		animation.add(animationName, [frameIndex]);
 	}
 
@@ -546,7 +555,7 @@ private class FlxButtonEvent implements IFlxDestroyable
 	 * @param   Callback   The callback function to call when this even fires.
 	 * @param   sound      The sound to play when this event fires.
 	 */
-	public function new(?Callback:Void->Void, ?sound:FlxSound)
+	public function new(?Callback:Void->Void, ?sound:FlxSound):Void
 	{
 		callback = Callback;
 

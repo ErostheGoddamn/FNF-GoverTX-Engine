@@ -2,6 +2,7 @@ package mobile.flixel;
 
 import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
 import openfl.display.Shape;
@@ -15,26 +16,27 @@ import mobile.flixel.FlxButton;
  */
 class FlxHitbox extends FlxSpriteGroup
 {
-	public var buttonLeft:FlxButton = new FlxButton(0, 0);
-	public var buttonDown:FlxButton = new FlxButton(0, 0);
-	public var buttonUp:FlxButton = new FlxButton(0, 0);
-	public var buttonRight:FlxButton = new FlxButton(0, 0);
-
-	var AlphaThing:Float = 0.2;
+	public var hints(default, null):Array<FlxButton>;
 
 	/**
 	 * Create the zone.
+	 * 
+	 * @param ammo The ammount of hints you want to create.
+	 * @param perHintWidth The width that the hints will use.
+	 * @param perHintHeight The height that the hints will use.
+	 * @param colors The color per hint.
 	 */
-	public function new():Void
+	public function new(ammo:UInt, perHintWidth:Int, perHintHeight:Int, colors:Array<FlxColor>):Void
 	{
 		super();
 
-		AlphaThing = ClientPrefs.hitboxalpha;
+		hints = new Array<FlxButton>();
 
-		add(buttonLeft = createHint(0, 0, Std.int(FlxG.width / 4), FlxG.height, 0xFF00FF));
-		add(buttonDown = createHint(FlxG.width / 4, 0, Std.int(FlxG.width / 4), FlxG.height, 0x00FFFF));
-		add(buttonUp = createHint(FlxG.width / 2, 0, Std.int(FlxG.width / 4), FlxG.height, 0x00FF00));
-		add(buttonRight = createHint((FlxG.width / 2) + (FlxG.width / 4), 0, Std.int(FlxG.width / 4), FlxG.height, 0xFF0000));
+		if (colors == null || (colors != null && colors.length < ammo))
+			colors = [0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF];
+
+		for (i in 0...ammo)
+			add(hints[i] = createHint(i * perHintWidth, 0, perHintWidth, perHintHeight, colors[i]));
 
 		scrollFactor.set();
 	}
@@ -42,14 +44,39 @@ class FlxHitbox extends FlxSpriteGroup
 	/**
 	 * Clean up memory.
 	 */
-	override function destroy():Void
+	override public function destroy():Void
 	{
 		super.destroy();
 
-		buttonLeft = FlxDestroyUtil.destroy(buttonLeft);
-		buttonUp = FlxDestroyUtil.destroy(buttonUp);
-		buttonDown = FlxDestroyUtil.destroy(buttonDown);
-		buttonRight = FlxDestroyUtil.destroy(buttonRight);
+		for (i in 0...hints.length)
+			hints[i] = FlxDestroyUtil.destroy(hints[i]);
+
+		hints.splice(0, hints.length);
+	}
+
+	private function createHint(X:Float, Y:Float, Width:Int, Height:Int, Color:Int = 0xFFFFFF):FlxButton
+	{
+		var hint:FlxButton = new FlxButton(X, Y);
+		hint.loadGraphic(createHintGraphic(Width, Height, Color));
+		hint.solid = false;
+		hint.multiTouch = true;
+		hint.immovable = true;
+		hint.scrollFactor.set();
+		hint.alpha = 0.00001;
+		hint.onDown.callback = hint.onOver.callback = function()
+		{
+			if (hint.alpha != 0.2)
+				hint.alpha = 0.2;
+		}
+		hint.onUp.callback = hint.onOut.callback = function()
+		{
+			if (hint.alpha != 0.00001)
+				hint.alpha = 0.00001;
+		}
+		#if FLX_DEBUG
+		hint.ignoreDrawDebug = true;
+		#end
+		return hint;
 	}
 
 	private function createHintGraphic(Width:Int, Height:Int, Color:Int = 0xFFFFFF):BitmapData
@@ -61,31 +88,7 @@ class FlxHitbox extends FlxSpriteGroup
 		shape.graphics.endFill();
 
 		var bitmap:BitmapData = new BitmapData(Width, Height, true, 0);
-		bitmap.draw(shape);
+		bitmap.draw(shape, true);
 		return bitmap;
-	}
-
-	private function createHint(X:Float, Y:Float, Width:Int, Height:Int, Color:Int = 0xFFFFFF):FlxButton
-	{
-		var hint:FlxButton = new FlxButton(X, Y);
-		hint.loadGraphic(createHintGraphic(Width, Height, Color));
-		hint.solid = false;
-		hint.immovable = true;
-		hint.scrollFactor.set();
-		hint.alpha = 0.00001;
-		hint.onDown.callback = hint.onOver.callback = function()
-		{
-			if (hint.alpha != AlphaThing)
-				hint.alpha = AlphaThing;
-		}
-		hint.onUp.callback = hint.onOut.callback = function()
-		{
-			if (hint.alpha != 0.00001)
-				hint.alpha = 0.00001;
-		}
-		#if FLX_DEBUG
-		hint.ignoreDrawDebug = true;
-		#end
-		return hint;
 	}
 }
