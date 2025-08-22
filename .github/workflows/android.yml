@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
         with:
-          submodules: false
+          submodules: true
 
       - name: Setup Android NDK
         id: setup-ndk
@@ -34,6 +34,7 @@ jobs:
           haxelib setup ~/haxelib
           haxelib install hmm --quiet
           haxelib run hmm install --quiet
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools.git
           haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp
           haxelib run lime rebuild hxcpp
 
