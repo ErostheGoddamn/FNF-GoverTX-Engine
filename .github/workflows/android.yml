@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
         with:
-          submodules: true
+          submodules: false
 
       - name: Setup Android NDK
         id: setup-ndk
@@ -53,6 +53,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@main
         with:
-          name: Psych Engine Android
+          name: GoverTX Engine Android
           path: export/release/android/bin/app/build/outputs/apk/debug
           if-no-files-found: warn
