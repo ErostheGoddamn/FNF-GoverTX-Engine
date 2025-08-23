@@ -8,7 +8,7 @@ import Controls;
 
 class ClientPrefs {
 	#if mobile
-	public static var padalpha:Float = 0.5;
+	public static var padalpha:Float = 0.6;
 	public static var hitboxalpha:Float = 0.2;
 	#end
 	public static var downScroll:Bool = false;
