@@ -1,58 +1,58 @@
 name: Android Build
-on: workflow_dispatch
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
-  Build:
+  build-android:
     runs-on: ubuntu-latest
-    permissions:
-        contents: write
-        actions: write
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
-        with:
-          submodules: true
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@main
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
-          ndk-version: r25c
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@main
-        with:
-          distribution: 'zulu'
-          java-version: '18'
+          distribution: "temurin"
+          java-version: "11"
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@master
+        uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.4
+          haxe-version: "4.2.5" # match your engine's version
 
-      - name: Installing Libraries
+      - name: Install Haxelib libraries
         run: |
           haxelib setup ~/haxelib
-          haxelib install hmm --quiet
-          haxelib run hmm install --quiet
-          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools.git
-          haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp
-          haxelib run lime rebuild hxcpp
+          haxelib install lime
+          haxelib install openfl
+          haxelib install flixel
+          haxelib install flixel-ui
+          haxelib install hxcpp
+          haxelib list
 
-      - name: Configure Android
-        run: |
-          haxelib run lime setup -alias -y
-          haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_HOME
-          haxelib run lime config JAVA_HOME $JAVA_HOME
-          haxelib run lime config ANDROID_SETUP true
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
-      - name: Building
-        run: haxelib run lime build android -final
-      - name: Upload Artifact
-        uses: actions/upload-artifact@main
+      - name: Setup Android SDK + NDK
+        uses: android-actions/setup-android@v3
         with:
-          name: GoverTX Engine Android
-          path: export/release/android/bin/app/build/outputs/apk/debug
-          if-no-files-found: warn
+          api-level: 30            # Android API version
+          ndk: 21.4.7075529        # Compatible NDK
+          cmake: 3.10.2.4988404    # Needed for Lime
+
+      - name: Accept Licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Setup Lime Android
+        run: haxelib run lime setup android --quiet
+
+      - name: Build APK
+        run: haxelib run lime build android -final
+
+      - name: Upload Artifact (APK)
+        uses: actions/upload-artifact@v3
+        with:
+          name: FNF-GoverTX-Android
+          path: export/release/android/bin/*.apk
