@@ -18,29 +18,29 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
-          java-version: "11"
+          java-version: "8"
 
-      - name: Setup Haxe
+      - name: Setup Haxe 4.1.5
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: "4.2.5" # match your engine's version
+          haxe-version: "4.1.5"
 
-      - name: Install Haxelib libraries
+      - name: Install Haxelib libraries (correct versions)
         run: |
           haxelib setup ~/haxelib
-          haxelib install lime
-          haxelib install openfl
-          haxelib install flixel
-          haxelib install flixel-ui
-          haxelib install hxcpp
+          haxelib install hxcpp 4.2.1
+          haxelib install lime 7.9.0
+          haxelib install openfl 8.9.7
+          haxelib install flixel 4.11.0
+          haxelib install flixel-ui 2.3.3
           haxelib list
 
       - name: Setup Android SDK + NDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 30            # Android API version
-          ndk: 21.4.7075529        # Compatible NDK
-          cmake: 3.10.2.4988404    # Needed for Lime
+          api-level: 29
+          ndk: 21.4.7075529
+          cmake: 3.10.2.4988404
 
       - name: Accept Licenses
         run: yes | sdkmanager --licenses
@@ -54,5 +54,5 @@ jobs:
       - name: Upload Artifact (APK)
         uses: actions/upload-artifact@v3
         with:
-          name: FNF-GoverTX-Android
+          name: GoverTX-Android
           path: export/release/android/bin/*.apk
