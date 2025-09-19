@@ -47,14 +47,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Middlescroll', 'If checked, your notes get centered.', 'middleScroll', 'bool', false);
-		addOption(option);
-
-		var option:Option = new Option('Instant Respawn',
-			"Instantly respawn when you die.",
-			'instaRestart',
-			'bool',
-			false);
-		addOption(option);
+		addOption(option)
 
 		var option:Option = new Option('Opponent Notes', 'If unchecked, opponent notes get hidden.', 'opponentStrums', 'bool', true);
 		addOption(option);
